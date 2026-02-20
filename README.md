@@ -35,6 +35,10 @@ It focuses on the modeling stack requested:
 ### 5) CLI demo
 - Interactive command line demo to test typical laptop support prompts.
 
+### 6) FastAPI API Server
+- Exposes the internal python logic through HTTP endpoints using `fastapi` and `pydantic`.
+- Connects the tech support assistant to UI frontends (like TypeScript).
+
 ---
 
 ## Project structure
@@ -46,6 +50,7 @@ It focuses on the modeling stack requested:
 - `src/tech_support_ai/datasets.py` – seed train set + sample KB
 - `scripts/train_model.py` – trains and saves classifier checkpoint
 - `scripts/demo_cli.py` – local chatbot demo
+- `scripts/api.py` – FastAPI HTTP server endpoint
 - `tests/test_pipeline.py` – basic model behavior tests
 
 ---
@@ -58,7 +63,12 @@ source .venv/bin/activate
 pip install -r requirements.txt
 pip install -e .
 python scripts/train_model.py
+
+# To run the local terminal demo:
 python scripts/demo_cli.py
+
+# To run the FastAPI server:
+python scripts/api.py
 ```
 
 ---
@@ -70,4 +80,4 @@ This baseline is intentionally lightweight so the team can extend it quickly:
 - add embedding retriever (e.g., sentence-transformers + FAISS) for semantic search
 - plug in enterprise-approved LLM endpoint for richer natural language responses
 - add guardrails, PII redaction, and model monitoring
-- expose via FastAPI for TypeScript UI integration
+- (~done~) expose via FastAPI for TypeScript UI integration
