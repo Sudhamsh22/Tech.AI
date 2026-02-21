@@ -31,20 +31,20 @@ class Vectorizer:
     token_to_idx: Dict[str, int]
 
     STOPWORDS = {
-        "hello", "hi", "dear", "team", "please", "thanks", "thank",
-        "regards", "best", "kind", "good", "day", "issue", "problem"
+        "hello","hi","dear","team","please","thanks","thank",
+        "regards","best","kind","good","day"
     }
 
     @classmethod
-    def build(cls, texts: Iterable[str], min_freq: int = 2) -> "Vectorizer":
+    def build(cls, texts: Iterable[str], min_freq: int = 1) -> "Vectorizer":
         counts: Dict[str, int] = {}
 
         for text in texts:
             tokens = [t for t in tokenize(text) if t not in cls.STOPWORDS]
 
             bigrams = [
-                tokens[i] + "_" + tokens[i + 1]
-                for i in range(len(tokens) - 1)
+                tokens[i] + "_" + tokens[i+1]
+                for i in range(len(tokens)-1)
             ]
 
             for tok in tokens + bigrams:
@@ -59,8 +59,8 @@ class Vectorizer:
         tokens = [t for t in tokenize(text) if t not in self.STOPWORDS]
 
         bigrams = [
-            tokens[i] + "_" + tokens[i + 1]
-            for i in range(len(tokens) - 1)
+            tokens[i] + "_" + tokens[i+1]
+            for i in range(len(tokens)-1)
         ]
 
         for tok in tokens + bigrams:
@@ -92,7 +92,7 @@ class TrainedClassifier:
 def train_classifier(
     examples: Sequence[Tuple[str, str]],
     labels: Sequence[str],
-    epochs: int = 5,
+    epochs: int = 10,
     lr: float = 1e-2,
 ) -> TrainedClassifier:
 
@@ -102,11 +102,11 @@ def train_classifier(
     for text, label in examples:
         grouped[label].append((text, label))
 
-    min_size = min(len(grouped[l]) for l in labels)
+    target = min(8000, min(len(grouped[l]) for l in labels))
 
     balanced: list[Tuple[str, str]] = []
     for l in labels:
-        balanced.extend(random.sample(grouped[l], min_size))
+        balanced.extend(random.sample(grouped[l], target))
 
     random.shuffle(balanced)
 
