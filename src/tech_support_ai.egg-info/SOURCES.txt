@@ -1,0 +1,15 @@
+README.md
+pyproject.toml
+src/tech_support_ai/__init__.py
+src/tech_support_ai/assistant.py
+src/tech_support_ai/classifier.py
+src/tech_support_ai/datasets.py
+src/tech_support_ai/preprocess.py
+src/tech_support_ai/retriever.py
+src/tech_support_ai/schema.py
+src/tech_support_ai.egg-info/PKG-INFO
+src/tech_support_ai.egg-info/SOURCES.txt
+src/tech_support_ai.egg-info/dependency_links.txt
+src/tech_support_ai.egg-info/requires.txt
+src/tech_support_ai.egg-info/top_level.txt
+tests/test_pipeline.py

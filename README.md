@@ -1,0 +1,83 @@
+# Tech.AI – Laptop Support Model (RAG + PyTorch)
+
+This repository now contains a **first working model layer** for an enterprise laptop support assistant.
+
+It focuses on the modeling stack requested:
+- issue classification (PyTorch)
+- retrieval over internal docs/tickets (RAG-style retriever)
+- grounded response generation with step-by-step guidance
+
+## What is implemented
+
+### 1) Data model and preprocessing
+- Structured support documents (`SupportDocument`) and troubleshooting responses (`SupportResponse`).
+- Text cleaning utility for manuals, ticket logs, and FAQs.
+
+### 2) PyTorch issue classifier
+- Classifies incoming support queries into categories:
+  - `connectivity`
+  - `hardware_failure`
+  - `software_error`
+  - `performance`
+  - `power_battery`
+- Includes train/eval utilities and a small seed training set.
+
+### 3) Retrieval module (RAG retrieval stage)
+- Lightweight BM25-style lexical retriever over cleaned internal docs.
+- Returns top-k evidence snippets used by the assistant response.
+
+### 4) Assistant orchestration model
+- `TechSupportAssistantModel` combines:
+  1. category prediction
+  2. evidence retrieval
+  3. step-by-step response assembly with confidence and sources
+
+### 5) CLI demo
+- Interactive command line demo to test typical laptop support prompts.
+
+### 6) FastAPI API Server
+- Exposes the internal python logic through HTTP endpoints using `fastapi` and `pydantic`.
+- Connects the tech support assistant to UI frontends (like TypeScript).
+
+---
+
+## Project structure
+
+- `src/tech_support_ai/preprocess.py` – cleaning and tokenization
+- `src/tech_support_ai/classifier.py` – PyTorch classifier and training helpers
+- `src/tech_support_ai/retriever.py` – BM25-style retriever
+- `src/tech_support_ai/assistant.py` – end-to-end model orchestration
+- `src/tech_support_ai/datasets.py` – seed train set + sample KB
+- `scripts/train_model.py` – trains and saves classifier checkpoint
+- `scripts/demo_cli.py` – local chatbot demo
+- `scripts/api.py` – FastAPI HTTP server endpoint
+- `tests/test_pipeline.py` – basic model behavior tests
+
+---
+
+## Quickstart
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate.bat
+pip install -r requirements.txt
+pip install -e .
+python scripts/train_model.py
+
+# To run the local terminal demo:
+python scripts/demo_cli.py
+
+# To run the FastAPI server:
+python scripts/api.py
+```
+
+---
+
+## Notes for production hardening
+
+This baseline is intentionally lightweight so the team can extend it quickly:
+- replace seed data with internal tickets/manuals
+- add embedding retriever (e.g., sentence-transformers + FAISS) for semantic search
+- plug in enterprise-approved LLM endpoint for richer natural language responses
+- add guardrails, PII redaction, and model monitoring
+- (~done~) expose via FastAPI for TypeScript UI integration
