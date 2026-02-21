@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Sequence
 
-from .classifier import TrainedClassifier, train_classifier
+from .classifier import TrainedClassifier, train_classifier, BagOfWordsClassifier, Vectorizer
 from .datasets import ISSUE_LABELS, SEED_TRAINING_EXAMPLES, sample_knowledge_base
 from .retriever import BM25Retriever
 from .schema import SupportResponse
@@ -17,6 +17,29 @@ class TechSupportAssistantModel:
     @classmethod
     def build_default(cls) -> "TechSupportAssistantModel":
         classifier = train_classifier(SEED_TRAINING_EXAMPLES, ISSUE_LABELS)
+        retriever = BM25Retriever(sample_knowledge_base())
+        return cls(classifier=classifier, retriever=retriever)
+
+    @classmethod
+    def load_from_checkpoint(cls, path: str) -> "TechSupportAssistantModel":
+        import torch
+
+        ckpt = torch.load(path, map_location="cpu")
+
+        vectorizer = Vectorizer(token_to_idx=ckpt["token_to_idx"])
+
+        model = BagOfWordsClassifier(
+            vocab_size=len(vectorizer.token_to_idx),
+            num_classes=len(ckpt["labels"]),
+        )
+        model.load_state_dict(ckpt["state_dict"])
+
+        classifier = TrainedClassifier(
+            model=model,
+            vectorizer=vectorizer,
+            labels=ckpt["labels"],
+        )
+
         retriever = BM25Retriever(sample_knowledge_base())
         return cls(classifier=classifier, retriever=retriever)
 
