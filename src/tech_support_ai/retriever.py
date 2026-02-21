@@ -50,5 +50,6 @@ class BM25Retriever:
     def retrieve(self, query: str, top_k: int = 3) -> List[RetrievedChunk]:
         query_tokens = tokenize(query)
         scored = [RetrievedChunk(doc=self.documents[i], score=self._score(query_tokens, i)) for i in range(len(self.documents))]
+        scored = [chunk for chunk in scored if chunk.score > 0]
         scored.sort(key=lambda x: x.score, reverse=True)
         return scored[:top_k]
