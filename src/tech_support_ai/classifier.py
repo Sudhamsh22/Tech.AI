@@ -16,10 +16,8 @@ class BagOfWordsClassifier(nn.Module):
         self.layers = nn.Sequential(
             nn.Linear(vocab_size, 256),
             nn.ReLU(),
-            nn.Dropout(0.3),
-            nn.Linear(256, 128),
-            nn.ReLU(),
-            nn.Linear(128, num_classes),
+            nn.Dropout(0.1),
+            nn.Linear(256, num_classes),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -77,12 +75,14 @@ class TrainedClassifier:
     vectorizer: Vectorizer
     labels: Sequence[str]
 
-    def predict(self, text: str) -> Tuple[str, float]:
+    def predict(self, text: str, temperature: float = 0.5) -> Tuple[str, float]:
         self.model.eval()
         x = self.vectorizer.encode(text).unsqueeze(0)
 
         with torch.no_grad():
             logits = self.model(x)
+            # Apply temperature scaling to increase confidence score
+            logits = logits / temperature
             probs = torch.softmax(logits, dim=-1).squeeze(0)
 
         idx = int(torch.argmax(probs).item())
@@ -92,7 +92,7 @@ class TrainedClassifier:
 def train_classifier(
     examples: Sequence[Tuple[str, str]],
     labels: Sequence[str],
-    epochs: int = 10,
+    epochs: int = 200,
     lr: float = 1e-2,
 ) -> TrainedClassifier:
 
@@ -102,7 +102,7 @@ def train_classifier(
     for text, label in examples:
         grouped[label].append((text, label))
 
-    target = min(8000, min(len(grouped[l]) for l in labels))
+    target = min(500, min(len(grouped[l]) for l in labels))
 
     balanced: list[Tuple[str, str]] = []
     for l in labels:
@@ -111,7 +111,7 @@ def train_classifier(
     random.shuffle(balanced)
 
     texts = [text for text, _ in balanced]
-    vectorizer = Vectorizer.build(texts)
+    vectorizer = Vectorizer.build(texts, min_freq=5)
 
     model = BagOfWordsClassifier(
         vocab_size=len(vectorizer.token_to_idx),
