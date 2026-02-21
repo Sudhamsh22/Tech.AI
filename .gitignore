@@ -5,3 +5,4 @@ artifacts/
 .pytest_cache/
 log.txt
 /data
+*.log
